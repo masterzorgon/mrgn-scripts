@@ -1,0 +1,23 @@
+{
+  "name": "mfi-sdk",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "@coral-xyz/anchor": "^0.31.1",
+    "@mrgnlabs/marginfi-client-v2": "^6.0.1",
+    "@mrgnlabs/mrgn-common": "^2.0.2",
+    "@solana-developers/helpers": "^2.8.1",
+    "@solana/spl-token": "^0.4.13",
+    "@solana/web3.js": "^1.98.0",
+    "bs58": "^6.0.0",
+    "debug": "^4.4.0",
+    "dotenv": "^16.5.0",
+    "fs": "^0.0.1-security"
+  }
+}
