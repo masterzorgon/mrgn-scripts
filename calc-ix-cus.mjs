@@ -107,32 +107,32 @@ const main = async () => {
 
     try {
         // create ix and simulate cus for deposit ix
-        // const depositIx = await buildInstructions({
-        //     program: client.program,
-        //     wallet,
-        //     bank: usdcBankInfo.bank,
-        //     account: account.address,
-        //     signerTokenAccountPk: usdcBankInfo.signerTokenAccountPk,
-        //     amount: 1,
-        //     ixType: "deposit"
-        // });
-        // const depositComputeUnits = await simulateComputeUnits(connection, depositIx, wallet.publicKey, []);
-    
-        // create ix and simulate cus for withdraw ix
-        const withdrawIx = await buildInstructions({
+        const depositIx = await buildInstructions({
             program: client.program,
             wallet,
-            bank: usdcBank.address,
+            bankPk: usdcBank.address,
             account: account.address,
-            signerTokenAccountPk: usdtSignerTokenAccountPk,
-            amount: 0.2,
-            ixType: "withdraw"
+            signerTokenAccountPk: usdcSignerTokenAccountPk,
+            amount: 1,
+            ixType: "deposit"
         });
-        const withdrawComputeUnits = await simulateComputeUnits(connection, withdrawIx, wallet.publicKey, []);
+        const depositComputeUnits = await simulateComputeUnits(connection, depositIx, wallet.publicKey, []);
+    
+        // create ix and simulate cus for withdraw ix
+        // const withdrawIx = await buildInstructions({
+        //     program: client.program,
+        //     wallet,
+        //     bank: usdcBank.address,
+        //     account: account.address,
+        //     signerTokenAccountPk: usdtSignerTokenAccountPk,
+        //     amount: 0.2,
+        //     ixType: "withdraw"
+        // });
+        // const withdrawComputeUnits = await simulateComputeUnits(connection, withdrawIx, wallet.publicKey, []);
     
         console.log("== Compute Unit Estimates ==");
-        // console.log("Deposit CUs: ", depositComputeUnits);
-        console.log("Withdraw CUs: ", withdrawComputeUnits);
+        console.log("Deposit CUs: ", depositComputeUnits);
+        // console.log("Withdraw CUs: ", withdrawComputeUnits);
     } catch (error) {
         console.log(error);
     }
