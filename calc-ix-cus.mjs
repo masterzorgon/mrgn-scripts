@@ -21,14 +21,24 @@ const getBank = async (client, wallet, mint) => {
     return { bank, signerTokenAccountPk };
 }
 
-const getInstructions = async (client, wallet, bank, signerTokenAccountPk, amount, ixType) => {
+const buildInstructions = async ({
+    client,
+    wallet,
+    bank,
+    mfiAccount,
+    signerTokenAccountPk,
+    amount,
+    ixType
+}) => {
+    const marginfiGroupPk = new PublicKey("4qp6Fx6tnZkY5Wropq9wUYgtFxXKwE6viZxFHg3rdAG8");
+
     switch (ixType) {
         case "deposit":
             return instructions.makeDepositIx(
                 client.program,
                 {
-                    marginfiGroupPk: new PublicKey("4qp6Fx6tnZkY5Wropq9wUYgtFxXKwE6viZxFHg3rdAG8"),
-                    marginfiAccountPk: new PublicKey("75YYwTfCPatxCcP871cwd69Pe9MQac6mEdPckbqH4Euc"),
+                    marginfiGroupPk: marginfiGroupPk,
+                    marginfiAccountPk: mfiAccount,
                     authorityPk: wallet.publicKey,
                     signerTokenAccountPk: signerTokenAccountPk,
                     bankPk: bank.address,
@@ -42,8 +52,8 @@ const getInstructions = async (client, wallet, bank, signerTokenAccountPk, amoun
             return instructions.makeWithdrawIx(
                 client.program,
                 {
-                  marginfiGroupPk: new PublicKey("4qp6Fx6tnZkY5Wropq9wUYgtFxXKwE6viZxFHg3rdAG8"),
-                  marginfiAccountPk: new PublicKey("75YYwTfCPatxCcP871cwd69Pe9MQac6mEdPckbqH4Euc"),
+                  marginfiGroupPk: marginfiGroupPk,
+                  marginfiAccountPk: mfiAccount,
                   signerPk: wallet.publicKey,
                   bankPk: bank.address,
                   destinationTokenAccountPk: signerTokenAccountPk,
@@ -74,19 +84,46 @@ const main = async () => {
     const wallet = NodeWallet.local();
     const config = getConfig("production");
     const client = await MarginfiClient.fetch(config, wallet, connection);
+    const mfiAccount = new PublicKey("2rVUjQ6C4tCFMHzf6RuqmGoMBrUv9ZEcucg2Y3XDUVKf");;
 
-    // get bank and signer token account pk
-    const wsolMint = new PublicKey("So11111111111111111111111111111111111111112");
-    const { bank, signerTokenAccountPk } = await getBank(client, wallet, wsolMint);
+    const TOKENS = {
+        USDC: {
+            mint: new PublicKey("EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v");
+        },
+        USDT: {
+            mint: new PublicKey("Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB");
+        },
+    };
+
+    const usdcBankInfo = await getBank(client, wallet, TOKENS.USDC.mint);
+    const usdtBankInfo = await getBank(client, wallet, TOKENS.USDT.mint);
 
     // create ix and simulate cus for deposit ix
-    // const depositIx = await getInstructions(client, wallet, bank, signerTokenAccountPk, 1, "deposit");
-    // const dpeositComputeUnits = await simulateComputeUnits(connection, depositIx, wallet.publicKey, []);
-    // console.log("Deposit CUs: ", dpeositComputeUnits);
+    const depositIx = await buildInstructions({
+        client,
+        wallet,
+        bank: usdcBankInfo.bank,
+        mfiAccount,
+        signerTokenAccountPk: usdcBankInfo.signerTokenAccountPk,
+        amount: 1,
+        ixType: "deposit"
+    });
+    const depositComputeUnits = await simulateComputeUnits(connection, depositIx, wallet.publicKey, []);
 
     // create ix and simulate cus for withdraw ix
-    const withdrawIx = await getInstructions(client, wallet, bank, signerTokenAccountPk, 0.2, "withdraw");
+    const withdrawIx = await getInstructions({
+        client,
+        wallet,
+        bank: usdcBankInfo.bank,
+        mfiAccount,
+        signerTokenAccountPk: usdtBankInfo.signerTokenAccountPk,
+        amount: 0.2,
+        ixType: "withdraw"
+    });
     const withdrawComputeUnits = await simulateComputeUnits(connection, withdrawIx, wallet.publicKey, []);
+
+    console.log("== Compute Unit Estimates ==");
+    console.log("Deposit CUs: ", depositComputeUnits);
     console.log("Withdraw CUs: ", withdrawComputeUnits);
 };
 
