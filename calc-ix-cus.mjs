@@ -88,43 +88,47 @@ const main = async () => {
 
     const TOKENS = {
         USDC: {
-            mint: new PublicKey("EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v");
+            mint: new PublicKey("EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v")
         },
         USDT: {
-            mint: new PublicKey("Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB");
+            mint: new PublicKey("Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB")
         },
     };
 
     const usdcBankInfo = await getBank(client, wallet, TOKENS.USDC.mint);
     const usdtBankInfo = await getBank(client, wallet, TOKENS.USDT.mint);
 
-    // create ix and simulate cus for deposit ix
-    const depositIx = await buildInstructions({
-        client,
-        wallet,
-        bank: usdcBankInfo.bank,
-        mfiAccount,
-        signerTokenAccountPk: usdcBankInfo.signerTokenAccountPk,
-        amount: 1,
-        ixType: "deposit"
-    });
-    const depositComputeUnits = await simulateComputeUnits(connection, depositIx, wallet.publicKey, []);
-
-    // create ix and simulate cus for withdraw ix
-    const withdrawIx = await getInstructions({
-        client,
-        wallet,
-        bank: usdcBankInfo.bank,
-        mfiAccount,
-        signerTokenAccountPk: usdtBankInfo.signerTokenAccountPk,
-        amount: 0.2,
-        ixType: "withdraw"
-    });
-    const withdrawComputeUnits = await simulateComputeUnits(connection, withdrawIx, wallet.publicKey, []);
-
-    console.log("== Compute Unit Estimates ==");
-    console.log("Deposit CUs: ", depositComputeUnits);
-    console.log("Withdraw CUs: ", withdrawComputeUnits);
+    try {
+        // create ix and simulate cus for deposit ix
+        const depositIx = await buildInstructions({
+            client,
+            wallet,
+            bank: usdcBankInfo.bank,
+            mfiAccount,
+            signerTokenAccountPk: usdcBankInfo.signerTokenAccountPk,
+            amount: 1,
+            ixType: "deposit"
+        });
+        const depositComputeUnits = await simulateComputeUnits(connection, depositIx, wallet.publicKey, []);
+    
+        // create ix and simulate cus for withdraw ix
+        const withdrawIx = await buildInstructions({
+            client,
+            wallet,
+            bank: usdcBankInfo.bank,
+            mfiAccount,
+            signerTokenAccountPk: usdtBankInfo.signerTokenAccountPk,
+            amount: 0.2,
+            ixType: "withdraw"
+        });
+        const withdrawComputeUnits = await simulateComputeUnits(connection, withdrawIx, wallet.publicKey, []);
+    
+        console.log("== Compute Unit Estimates ==");
+        console.log("Deposit CUs: ", depositComputeUnits);
+        console.log("Withdraw CUs: ", withdrawComputeUnits);
+    } catch (error) {
+        console.log(error);
+    }
 };
 
-main().catch((e) => console.log(e));
+main()
