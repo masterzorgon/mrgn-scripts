@@ -119,20 +119,20 @@ const main = async () => {
         const depositComputeUnits = await simulateComputeUnits(connection, depositIx, wallet.publicKey, []);
     
         // create ix and simulate cus for withdraw ix
-        const withdrawIx = await buildInstructions({
-            program: client.program,
-            wallet,
-            bankPk: usdcBank.address,
-            account: account.address,
-            signerTokenAccountPk: usdtSignerTokenAccountPk,
-            amount: 0.1,
-            ixType: "withdraw"
-        });
-        const withdrawComputeUnits = await simulateComputeUnits(connection, withdrawIx, wallet.publicKey, []);
+        // const withdrawIx = await buildInstructions({
+        //     program: client.program,
+        //     wallet,
+        //     bankPk: usdcBank.address,
+        //     account: account.address,
+        //     signerTokenAccountPk: usdtSignerTokenAccountPk,
+        //     amount: 0.1,
+        //     ixType: "withdraw"
+        // });
+        // const withdrawComputeUnits = await simulateComputeUnits(connection, withdrawIx, wallet.publicKey, []);
     
         console.log("== Compute Unit Estimates ==");
         console.log("Deposit CUs: ", depositComputeUnits);
-        console.log("Withdraw CUs: ", withdrawComputeUnits);
+        // console.log("Withdraw CUs: ", withdrawComputeUnits);
     } catch (error) {
         console.log(error);
     }
